@@ -26,6 +26,7 @@ class ProjectUpsertRequest extends FormRequest
             "description"=>["required","string","max:255"],
             "image"=>["nullable","image"],
             "type_id"=>"nullable|exists:types,id",
+            "technologies" =>"nullable",
         ];
     }
 

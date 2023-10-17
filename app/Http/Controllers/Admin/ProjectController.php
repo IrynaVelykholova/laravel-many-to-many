@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\ProjectUpsertRequest;
 use App\Models\Project;
+use App\Models\Technology;
 use App\Models\Type;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
@@ -24,7 +25,8 @@ class ProjectController extends Controller
 
     public function create() {
         $types = Type::all();
-        return view('admin.projects.create', ["types" => $types]); //secondo argomento types
+        $technologies = Technology::all();
+        return view('admin.projects.create', compact('types', 'technologies')); 
     }
 
     public function store(ProjectUpsertRequest $request) {
@@ -36,14 +38,18 @@ class ProjectController extends Controller
 
         
         $project = Project::create($data); //fill e save
+        if (key_exists("technologies", $data)) {
+            $project->technologies()->attach($data["technologies"]);
+        }
         return redirect()->route('admin.projects.show', $project->slug);
     }
 
     public function edit($slug) {
         $project = Project::where("slug", $slug)->firstOrFail();
         $types = Type::all();
+        $technologies = Technology::all();
 
-        return view('admin.projects.edit', compact("project", "types"));
+        return view('admin.projects.edit', compact("project", "types", "technologies"));
     }
 
     public function update(ProjectUpsertRequest $request, $slug) {//va passato l'id come secondo argomento
@@ -64,6 +70,7 @@ class ProjectController extends Controller
             $data['image'] = $image_percorso;
         }
     
+        $project->technologies()->sync($data["technologies"]);
 
         $project -> update($data);// fill + save
 
@@ -76,6 +83,7 @@ class ProjectController extends Controller
         if ($project->image) {
             Storage::delete($project->image); //cancello dallo storage l'immagine
         }
+        $project->technologies()->detach();
         $project->delete();
         
         return redirect()->route('admin.projects.index');

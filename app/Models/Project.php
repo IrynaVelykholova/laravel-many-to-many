@@ -21,5 +21,9 @@ class Project extends Model
     public function type() { //in SINGOLARE
         return $this->belongsTo(Type::class); //un projects appartiene a una tipologia
     }
+
+    public function technologies() { //in PLURALE
+        return $this->belongsToMany(Technology::class); 
+    }
     
 }
